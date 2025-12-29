@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy New Year 🤍</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  min-height:100vh;
+  font-family:'Poppins',sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(255,215,160,0.12), transparent 40%),
+    linear-gradient(135deg, #05060f, #120c25, #05060f);
+  background-size:200% 200%;
+  animation:bgDrift 22s ease infinite;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  color:#f7f4ef;
+}
+
+@keyframes bgDrift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* Darkening overlay */
+#nightOverlay{
+  position:fixed;
+  inset:0;
+  background:#05060f;
+  opacity:0;
+  transition:opacity 30s ease;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Start Screen */
+.start-screen{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+}
+.start-screen button{
+  padding:16px 36px;
+  border:none;
+  border-radius:30px;
+  background:#fff;
+  color:#b05f8d;
+  font-size:1.05rem;
+  cursor:pointer;
+}
+
+/* Container */
+.container{
+  display:none;
+  max-width:460px;
+  width:100%;
+  padding:20px;
+  z-index:1;
+}
+
+/* Card */
+.card{
+  position:relative;
+  background:rgba(20,18,40,.6);
+  backdrop-filter:blur(22px);
+  border-radius:28px;
+  padding:46px 36px 54px;
+  text-align:center;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.55),
+    inset 0 0 0 1px rgba(255,215,160,.25);
+}
+
+/* Badges */
+.india-badge{
+  position:absolute;
+  top:16px; right:16px;
+  font-size:.65rem;
+  padding:6px 14px;
+  border-radius:18px;
+  background:rgba(255,215,160,.18);
+  color:#fff7e6;
+}
+.midnight-label{
+  position:absolute;
+  top:46px; right:18px;
+  font-size:.6rem;
+  letter-spacing:.6px;
+  opacity:.65;
+}
+.hidden{display:none}
+
+/* Title */
+.card h1{
+  font-family:'Playfair Display',serif;
+  font-size:2.1rem;
+  margin-bottom:24px;
+  color:#fff7e6;
+  letter-spacing:.6px;
+  text-shadow:
+    0 0 14px rgba(255,215,160,.45),
+    0 0 28px rgba(255,215,160,.25);
+}
+
+/* Midnight glow pulse → white */
+.midnight-glow{
+  animation:titlePulse 2.4s ease forwards;
+}
+@keyframes titlePulse{
+  0%{
+    text-shadow:
+      0 0 14px rgba(255,215,160,.45),
+      0 0 28px rgba(255,215,160,.25);
+  }
+  50%{
+    text-shadow:
+      0 0 30px rgba(255,215,160,.9),
+      0 0 60px rgba(255,215,160,.6);
+  }
+  100%{
+    text-shadow:
+      0 0 18px rgba(255,255,255,.7),
+      0 0 36px rgba(255,255,255,.45);
+  }
+}
+
+/* Cursor */
+.cursor{
+  font-size:1.4rem;
+  animation:blink 1s infinite;
+}
+.cursor.typing-glow{
+  animation:none;
+  box-shadow:
+    0 0 10px rgba(255,215,160,.6),
+    0 0 22px rgba(255,215,160,.4);
+}
+@keyframes blink{
+  0%,50%{opacity:1}
+  51%,100%{opacity:0}
+}
+
+/* Countdown */
+.countdown{font-size:1.15rem;margin-top:6px}
+
+/* Typing */
+.typing{
+  font-size:.98rem;
+  line-height:2.05;
+  white-space:pre-line;
+  color:#f3efe8;
+}
+
+/* Download */
+.download-btn{
+  margin-top:30px;
+  padding:12px 26px;
+  border-radius:28px;
+  border:1px solid rgba(255,215,160,.4);
+  background:rgba(255,215,160,.15);
+  color:#fff7e6;
+  font-size:.85rem;
+  cursor:pointer;
+}
+
+/* Sparkles */
+.sparkles span{
+  position:absolute;
+  width:3px;height:3px;
+  background:rgba(255,215,160,.9);
+  border-radius:50%;
+  opacity:.35;
+  animation:
+    sparkleFloat 18s linear infinite,
+    sparkleFade 300s linear forwards;
+}
+@keyframes sparkleFloat{
+  from{transform:translateY(0)}
+  to{transform:translateY(-120vh)}
+}
+@keyframes sparkleFade{
+  from{opacity:.35}
+  to{opacity:0}
+}
+
+/* Orbs */
+.orbs span{
+  position:absolute;
+  width:180px;height:180px;
+  background:rgba(255,215,160,.18);
+  filter:blur(60px);
+  border-radius:50%;
+  animation:orbFloat 20s infinite ease-in-out;
+}
+.orbs span:nth-child(1){top:10%;left:15%}
+.orbs span:nth-child(2){top:60%;left:70%;animation-delay:-6s}
+.orbs span:nth-child(3){top:80%;left:25%;animation-delay:-12s}
+
+@keyframes orbFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-40px)}
+}
+
+/* Mobile */
+@media(max-width:480px){
+  .card{padding:34px 22px 46px}
+  .card h1{font-size:1.6rem}
+  .typing{font-size:.9rem}
+}
+</style>
+</head>
+
+<body>
+
+<div id="nightOverlay"></div>
+
+<div class="start-screen" id="startScreen">
+  <button onclick="startExperience()">Tap to Begin ✨</button>
+</div>
+
+<div class="container" id="content">
+  <div class="card" id="memoryCard">
+
+    <div class="india-badge">🇮🇳 India Time (IST)</div>
+    <div id="midnightLabel" class="midnight-label hidden">Midnight Passed 🌙</div>
+
+    <h1>Happy New Year <span id="year"></span>, My Smoochy 🤍</h1>
+
+    <div id="preTyping">
+      <span class="cursor">|</span>
+      <div id="countdown" class="countdown hidden">3</div>
+    </div>
+
+    <p id="typingText" class="typing"></p>
+
+    <button class="download-btn" onclick="downloadMemory()">
+      ⬇ Download as Memory
+    </button>
+  </div>
+</div>
+
+<div class="orbs"><span></span><span></span><span></span></div>
+<div class="sparkles">
+  <span style="top:90%;left:10%"></span><span style="top:95%;left:30%"></span>
+  <span style="top:92%;left:50%"></span><span style="top:98%;left:70%"></span>
+  <span style="top:94%;left:85%"></span>
+</div>
+
+<script>
+/* Messages */
+const beforeMidnightMessage=`Just a few moments left…
+waiting to step into a new year with you 🤍`;
+
+const afterMidnightMessage=`Happy New Year, my love 🤍
+
+It’s officially a new year,
+and I still choose you —
+softly, honestly, always.
+
+No big promises.
+Just real feelings.
+And you.
+
+— yours, luckily 🤍`;
+
+/* Cursor */
+const cursor=document.querySelector('.cursor');
+function startGlow(){cursor.classList.add('typing-glow')}
+function stopGlow(){cursor.classList.remove('typing-glow')}
+
+/* Typing */
+let index=0,text="";
+function typeText(t){
+  text=t;index=0;
+  typingText.innerHTML="";
+  startGlow();loop();
+}
+function loop(){
+  if(index<text.length){
+    typingText.innerHTML+=text.charAt(index++);
+    setTimeout(loop,35);
+  }else stopGlow();
+}
+
+/* IST Time */
+function getIST(){
+  const n=new Date();
+  return new Date(n.getTime()+n.getTimezoneOffset()*60000+19800000);
+}
+function updateYear(){
+  year.textContent=getIST().getFullYear();
+}
+
+/* Confetti 🇮🇳 */
+function triggerConfetti(){
+  const colors=['#FF9933','#FFFFFF','#138808'];
+  const end=Date.now()+3000;
+  (function f(){
+    confetti({particleCount:4,colors,spread:60,origin:{x:0}});
+    confetti({particleCount:4,colors,spread:60,origin:{x:1}});
+    if(Date.now()<end)requestAnimationFrame(f);
+  })();
+}
+
+/* Midnight */
+function scheduleMidnight(){
+  const t=getIST();
+  const ms=new Date(t.getFullYear(),t.getMonth(),t.getDate()+1)-t;
+  setTimeout(()=>{
+    triggerConfetti();
+    updateYear();
+    midnightLabel.classList.remove("hidden");
+    document.getElementById("nightOverlay").style.opacity="0.35";
+    document.querySelector("h1").classList.add("midnight-glow");
+    typeText(afterMidnightMessage);
+  },ms);
+}
+
+/* Download */
+function downloadMemory(){
+  html2canvas(memoryCard,{scale:2,useCORS:true})
+    .then(c=>{
+      const a=document.createElement("a");
+      a.download=`new-year-memory-${getIST().getFullYear()}.png`;
+      a.href=c.toDataURL("image/png");
+      a.click();
+    });
+}
+
+/* Start */
+function startExperience(){
+  startScreen.style.display="none";
+  content.style.display="block";
+  updateYear();
+
+  if(getIST().getHours()===0) midnightLabel.classList.remove("hidden");
+
+  let c=3;
+  countdown.classList.remove("hidden");
+  countdown.textContent=c;
+
+  const timer=setInterval(()=>{
+    c--;
+    if(c>0) countdown.textContent=c;
+    else{
+      clearInterval(timer);
+      countdown.style.display="none";
+      typeText(beforeMidnightMessage);
+      scheduleMidnight();
+    }
+  },1000);
+}
+</script>
+
+</body>
+</html>
