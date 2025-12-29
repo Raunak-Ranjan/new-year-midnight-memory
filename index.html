@@ -9,6 +9,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -222,11 +223,22 @@ body{
   .card h1{font-size:1.6rem}
   .typing{font-size:.9rem}
 }
+
+/* Flash Overlay Style */
+#flashOverlay {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
 </style>
 </head>
 
 <body>
 
+<div id="flashOverlay"></div>
 <div id="nightOverlay"></div>
 
 <div class="start-screen" id="startScreen">
@@ -285,15 +297,19 @@ function stopGlow(){cursor.classList.remove('typing-glow')}
 
 /* Typing */
 let index=0,text="";
+let typingInterval; // Track interval to clear it if forced
+
 function typeText(t){
+  if(typingInterval) clearInterval(typingInterval);
   text=t;index=0;
   typingText.innerHTML="";
-  startGlow();loop();
+  startGlow();
+  loop();
 }
 function loop(){
   if(index<text.length){
     typingText.innerHTML+=text.charAt(index++);
-    setTimeout(loop,35);
+    typingInterval = setTimeout(loop,35);
   }else stopGlow();
 }
 
@@ -317,18 +333,37 @@ function triggerConfetti(){
   })();
 }
 
-/* Midnight */
+/* --- THE INJECTOR: MIDNIGHT WOW TRANSITION --- */
+function executeMidnightWOW() {
+    const flash = document.getElementById('flashOverlay');
+    
+    // Smooth cinematic transition using GSAP
+    gsap.to(flash, { opacity: 1, duration: 0.4, ease: "power2.in", onComplete: () => {
+        // Change content behind the flash
+        triggerConfetti();
+        updateYear();
+        midnightLabel.classList.remove("hidden");
+        document.getElementById("nightOverlay").style.opacity="0.35";
+        document.querySelector("h1").classList.add("midnight-glow");
+        
+        // Rewrite message
+        typeText(afterMidnightMessage);
+        
+        // Fade out the flash
+        gsap.to(flash, { opacity: 0, duration: 1.5, ease: "power2.out" });
+    }});
+}
+
+/* Midnight Monitor */
 function scheduleMidnight(){
-  const t=getIST();
-  const ms=new Date(t.getFullYear(),t.getMonth(),t.getDate()+1)-t;
-  setTimeout(()=>{
-    triggerConfetti();
-    updateYear();
-    midnightLabel.classList.remove("hidden");
-    document.getElementById("nightOverlay").style.opacity="0.35";
-    document.querySelector("h1").classList.add("midnight-glow");
-    typeText(afterMidnightMessage);
-  },ms);
+  const checker = setInterval(() => {
+    const t = getIST();
+    // Triggers exactly at 00:00:00
+    if(t.getHours() === 0 && t.getMinutes() === 0 && t.getSeconds() === 0) {
+        executeMidnightWOW();
+        clearInterval(checker);
+    }
+  }, 1000);
 }
 
 /* Download */
@@ -365,6 +400,11 @@ function startExperience(){
     }
   },1000);
 }
+
+/* DEV TOOL: PRESS 'M' TO FORCE MIDNIGHT TRANSITION */
+window.addEventListener('keydown', (e) => {
+    if(e.key.toLowerCase() === 'm') executeMidnightWOW();
+});
 </script>
 
 </body>
