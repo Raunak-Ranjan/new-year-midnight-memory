@@ -13,13 +13,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
-html, body{
+html,body{
   width:100%;
   min-height:100%;
 }
 
 body{
-  min-height:100svh; /* Safari safe */
+  min-height:100svh;
   font-family:'Poppins',sans-serif;
   background:
     radial-gradient(circle at top, rgba(255,215,160,0.12), transparent 40%),
@@ -42,18 +42,10 @@ body{
   100%{background-position:0% 50%}
 }
 
-/* Overlays */
-#nightOverlay,#flashOverlay{
+/* Start screen */
+.start-screen{
   position:fixed;
   inset:0;
-  pointer-events:none;
-}
-#nightOverlay{background:#05060f;opacity:0;transition:opacity 30s ease}
-#flashOverlay{background:#fff;opacity:0;z-index:9999}
-
-/* Start */
-.start-screen{
-  position:fixed; inset:0;
   background:rgba(0,0,0,.45);
   display:flex;
   align-items:center;
@@ -70,7 +62,7 @@ body{
   cursor:pointer;
 }
 
-/* Layout wrapper */
+/* Layout */
 .container{
   display:none;
   min-height:100svh;
@@ -88,7 +80,7 @@ body{
   background:rgba(20,18,40,.6);
   backdrop-filter:blur(22px);
   border-radius:28px;
-  padding:42px 28px 48px;
+  padding:44px 28px 52px;
   text-align:center;
   box-shadow:
     0 30px 80px rgba(0,0,0,.55),
@@ -101,22 +93,13 @@ h1{
   font-size:2rem;
   margin-bottom:22px;
   color:#fff7e6;
-  text-shadow:0 0 18px rgba(255,215,160,.45);
+  text-shadow:
+    0 0 18px rgba(255,215,160,.45),
+    0 0 30px rgba(255,215,160,.25);
 }
 
-/* Heartbeat */
-.heartbeat{
-  animation:heartbeat 2.8s ease-in-out infinite;
-}
-@keyframes heartbeat{
-  0%{text-shadow:0 0 16px rgba(255,215,160,.4)}
-  10%{text-shadow:0 0 28px rgba(255,215,160,.85)}
-  20%{text-shadow:0 0 18px rgba(255,215,160,.5)}
-  100%{text-shadow:0 0 16px rgba(255,215,160,.4)}
-}
-
-/* Midnight glow */
-.midnight-glow{
+/* Gentle glow */
+.glow{
   animation:glowOnce 2.4s ease forwards;
 }
 @keyframes glowOnce{
@@ -125,26 +108,9 @@ h1{
   100%{text-shadow:0 0 26px rgba(255,255,255,.9)}
 }
 
-/* Countdown */
-.countdown{
-  font-size:3rem;
-  letter-spacing:3px;
-  font-weight:600;
-}
-
-/* Pre text */
-.pre-text{
-  margin-top:12px;
-  font-size:.9rem;
-  line-height:1.7;
-  opacity:.85;
-  min-height:48px;
-  transition:opacity .8s ease;
-}
-
 /* Message */
 .message{
-  margin-top:18px;
+  margin-top:10px;
   font-size:.98rem;
   line-height:2.05;
   white-space:pre-line;
@@ -153,7 +119,8 @@ h1{
 /* Sparkles */
 .sparkles span{
   position:fixed;
-  width:3px;height:3px;
+  width:3px;
+  height:3px;
   background:rgba(255,215,160,.9);
   border-radius:50%;
   opacity:.35;
@@ -164,18 +131,14 @@ h1{
   to{transform:translateY(-120vh)}
 }
 
-/* Mobile text tuning */
+/* Small phones */
 @media(max-width:380px){
   h1{font-size:1.7rem}
-  .countdown{font-size:2.6rem}
 }
 </style>
 </head>
 
 <body>
-
-<div id="flashOverlay"></div>
-<div id="nightOverlay"></div>
 
 <div class="start-screen" id="startScreen">
   <button onclick="startExperience()">Tap to Begin ✨</button>
@@ -184,11 +147,6 @@ h1{
 <div class="container" id="content">
   <div class="card">
     <h1 id="title">Happy New Year 2026, My Smoochy 🤍</h1>
-
-    <div id="countdown" class="countdown">00:00</div>
-
-    <div id="preText" class="pre-text"></div>
-
     <div id="finalMessage" class="message"></div>
   </div>
 </div>
@@ -206,10 +164,7 @@ h1{
 </div>
 
 <script>
-const preTextContent=`Just a few moments left…
-waiting to step into a new year with you 🤍`;
-
-const finalMessageText=`Happy New Year, my love 🤍
+const finalMessageText = `Happy New Year, my love 🤍
 
 It’s officially a new year,
 and I still choose you —
@@ -221,77 +176,31 @@ And you.
 
 — yours, luckily 🤍`;
 
-function getIST(){
-  const n=new Date();
-  return new Date(n.getTime()+n.getTimezoneOffset()*60000+19800000);
-}
-
-function fireConfetti(){
-  const colors=['#FF9933','#FFFFFF','#138808'];
-  const end=Date.now()+2500;
-  (function f(){
-    confetti({particleCount:6,colors,spread:70,origin:{x:0}});
-    confetti({particleCount:6,colors,spread:70,origin:{x:1}});
-    if(Date.now()<end)requestAnimationFrame(f);
-  })();
-}
-
-function typeWriter(text,el,speed=45){
+/* Typewriter */
+function typeWriter(text, el, speed=45){
   el.innerHTML="";
   let i=0;
   const t=setInterval(()=>{
-    el.innerHTML+=text.charAt(i++);
-    if(i>=text.length) clearInterval(t);
-  },speed);
-}
-
-let done=false;
-function triggerMidnight(){
-  if(done) return;
-  done=true;
-
-  countdown.textContent="00:00";
-  preText.style.opacity=0;
-
-  gsap.to(flashOverlay,{
-    opacity:1,duration:.35,onComplete:()=>{
-      fireConfetti();
-      nightOverlay.style.opacity="0.35";
-      title.classList.remove("heartbeat");
-      title.classList.add("midnight-glow");
-      typeWriter(finalMessageText,finalMessage,45);
-      gsap.to(flashOverlay,{opacity:0,duration:1.4});
-    }
-  });
-}
-
-function startCountdown(){
-  typeWriter(preTextContent,preText,50);
-  setInterval(()=>{
-    const now=getIST();
-    const midnight=new Date(now);
-    midnight.setHours(24,0,0,0);
-    const diff=midnight-now;
-    if(diff<=0) triggerMidnight();
-    else{
-      countdown.textContent=
-        `${String(Math.floor(diff/60000)).padStart(2,'0')}:${String(Math.floor((diff%60000)/1000)).padStart(2,'0')}`;
-    }
-  },1000);
+    el.innerHTML += text.charAt(i++);
+    if(i >= text.length) clearInterval(t);
+  }, speed);
 }
 
 function startExperience(){
   startScreen.style.display="none";
   content.style.display="flex";
+
   bgMusic.volume=0.22;
   bgMusic.play().catch(()=>{});
-  title.classList.add("heartbeat");
-  startCountdown();
-}
 
-window.addEventListener("keydown",e=>{
-  if(e.key.toLowerCase()==="m") triggerMidnight();
-});
+  title.classList.add("glow");
+  typeWriter(finalMessageText, finalMessage, 45);
+
+  // Soft confetti once
+  setTimeout(()=>{
+    confetti({particleCount:40,spread:70,origin:{y:0.6}});
+  },600);
+}
 </script>
 
 </body>
